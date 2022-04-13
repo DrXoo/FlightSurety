@@ -2,22 +2,25 @@ const FlightSuretyApp = artifacts.require("FlightSuretyApp");
 const FlightSuretyData = artifacts.require("FlightSuretyData");
 const fs = require('fs');
 
-module.exports = function(deployer) {
+module.exports = async function(deployer) {
 
     let firstAirline = '0xf17f52151EbEF6C7334FAD080c5704D77216b732';
-    deployer.deploy(FlightSuretyData)
-    .then(() => {
-        return deployer.deploy(FlightSuretyApp)
-                .then(() => {
-                    let config = {
-                        localhost: {
-                            url: 'http://localhost:8545',
-                            dataAddress: FlightSuretyData.address,
-                            appAddress: FlightSuretyApp.address
-                        }
-                    }
-                    fs.writeFileSync(__dirname + '/../src/dapp/config.json',JSON.stringify(config, null, '\t'), 'utf-8');
-                    fs.writeFileSync(__dirname + '/../src/server/config.json',JSON.stringify(config, null, '\t'), 'utf-8');
-                });
-    });
+    await deployer.deploy(FlightSuretyData);
+
+    var flightSuretyData = await FlightSuretyData.deployed();
+
+    await deployer.deploy(FlightSuretyApp, flightSuretyData.address)
+
+    var flightSuretyApp = await FlightSuretyApp.deployed();
+
+    const config = {
+        localhost: {
+            url: 'http://localhost:9545',
+            dataAddress: flightSuretyData.address,
+            appAddress: flightSuretyApp.address 
+        }
+    }
+
+    fs.writeFileSync(__dirname + '/../src/dapp/config.json',JSON.stringify(config, null, '\t'), 'utf-8');
+    fs.writeFileSync(__dirname + '/../src/server/config.json',JSON.stringify(config, null, '\t'), 'utf-8');
 }
