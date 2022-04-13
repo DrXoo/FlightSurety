@@ -1,9 +1,17 @@
 pragma solidity ^0.4.25;
 
-import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract FlightSuretyCore {
     using SafeMath for uint256;
+
+    // Flight status codees
+    uint8 constant STATUS_CODE_UNKNOWN = 0;
+    uint8 constant STATUS_CODE_ON_TIME = 10;
+    uint8 constant STATUS_CODE_LATE_AIRLINE = 20;
+    uint8 constant STATUS_CODE_LATE_WEATHER = 30;
+    uint8 constant STATUS_CODE_LATE_TECHNICAL = 40;
+    uint8 constant STATUS_CODE_LATE_OTHER = 50;
 
     address private contractOwner;
     bool private operational = true;  

@@ -5,7 +5,8 @@ pragma solidity ^0.4.25;
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./FlightSuretyCore.sol";
+import "./core/FlightSuretyCore.sol";
+import "./interface/FlightSuretyDataInterface.sol";
 
 /************************************************** */
 /* FlightSurety Smart Contract                      */
@@ -17,21 +18,7 @@ contract FlightSuretyApp is FlightSuretyCore {
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
 
-    // Flight status codees
-    uint8 private constant STATUS_CODE_UNKNOWN = 0;
-    uint8 private constant STATUS_CODE_ON_TIME = 10;
-    uint8 private constant STATUS_CODE_LATE_AIRLINE = 20;
-    uint8 private constant STATUS_CODE_LATE_WEATHER = 30;
-    uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
-    uint8 private constant STATUS_CODE_LATE_OTHER = 50;
-
-    struct Flight {
-        bool isRegistered;
-        uint8 statusCode;
-        uint256 updatedTimestamp;        
-        address airline;
-    }
-    mapping(bytes32 => Flight) private flights;
+    FlightSuretyDataInterface flightSuretyData;
 
  
     /********************************************************************************************/
@@ -42,8 +29,9 @@ contract FlightSuretyApp is FlightSuretyCore {
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
 
-    constructor() public 
+    constructor(address dataContract) public 
     {
+        flightSuretyData = FlightSuretyDataInterface(dataContract);
     }
 
     /********************************************************************************************/
@@ -60,9 +48,10 @@ contract FlightSuretyApp is FlightSuretyCore {
     * @dev Add an airline to the registration queue
     *
     */   
-    function registerAirline()external pure returns(bool success, uint256 votes)
+    function registerAirline(address newAirline) external returns(bool success, uint256 votes)
     {
-        return (success, 0);
+        flightSuretyData.registerAirline(newAirline);
+        return flightSuretyData.getRegistrationStatus(newAirline);
     }
 
 
@@ -70,17 +59,24 @@ contract FlightSuretyApp is FlightSuretyCore {
     * @dev Register a future flight for insuring.
     *
     */  
-    function registerFlight() external pure
+    function registerFlight(address airline, string flight, uint256 flightTimestamp) external
     {
-
+        bytes32 key = getFlightKey(airline, flight, flightTimestamp);
+        flightSuretyData.addFlight(airline, key);
     }
     
    /**
     * @dev Called after oracle has updated flight status
     *
     */  
-    function processFlightStatus(address airline, string memory flight, uint256 timestamp, uint8 statusCode) internal pure
+    function processFlightStatus(address airline, string memory flight, uint256 timestamp, uint8 statusCode) internal
     {
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+
+        if(statusCode == STATUS_CODE_LATE_AIRLINE)
+        {
+            flightSuretyData.creditInsurees(key);
+        }
     }
 
 
