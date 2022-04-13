@@ -11,7 +11,6 @@ contract FlightSuretyData is FlightSuretyCoreData {
     /********************************************************************************************/
 
     uint8 public constant REGISTRATION_MULTIPARTY_THRESHOLD = 4;
-    //uint256 private constant AMOUNT_MULTIPLIER = 1.5;
 
     struct Insurance {
         bool isActive;
@@ -161,7 +160,7 @@ contract FlightSuretyData is FlightSuretyCoreData {
         flights[flightKey].insurances[msg.sender].amount = 0;
         flights[flightKey].insurances[msg.sender].isActive = false;
 
-        address(msg.sender).transfer(amount.mul(15) / 10);
+        address(msg.sender).transfer(amount.div(10).mul(15)); // amount * 1,5
     }
 
     /**
