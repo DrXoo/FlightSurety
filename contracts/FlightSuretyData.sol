@@ -12,7 +12,13 @@ contract FlightSuretyData is FlightSuretyCoreData {
 
     uint8 public constant REGISTRATION_MULTIPARTY_THRESHOLD = 4;
 
-    mapping(address => uint8) private airlines;
+    struct Airline {    
+        bool isRegistered;  
+        address airline;
+        uint256 funds;
+    }
+
+    mapping(address => Airline) private airlines;
     
     uint256 private airlinesLength = 0;
     address[] airlineVotes = new address[](0);
@@ -29,13 +35,17 @@ contract FlightSuretyData is FlightSuretyCoreData {
     constructor() public 
     {
         // Make the contract owner be the first airline to register
-        airlines[msg.sender] = 1; 
-        airlinesLength.add(1);
+        _addAirline(msg.sender);
     }
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
+
+    modifier isExternalCallerRegistered() {
+        require(airlines[tx.origin].isRegistered);
+        _;
+    }
 
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
@@ -50,9 +60,9 @@ contract FlightSuretyData is FlightSuretyCoreData {
     *      Can only be called from FlightSuretyApp contract
     *
     */   
-    function registerAirline(address newAirline) requireIsOperational requireIsCallerAuthorized entrancyGuard external 
+    function registerAirline(address newAirline) requireIsOperational requireIsCallerAuthorized isExternalCallerRegistered entrancyGuard external 
     {
-        require(airlines[newAirline] != 1); // Not to register an already register airline
+        require(!airlines[newAirline].isRegistered); // Not to register an already register airline
 
         if(airlinesLength <= REGISTRATION_MULTIPARTY_THRESHOLD) 
         {
@@ -89,7 +99,7 @@ contract FlightSuretyData is FlightSuretyCoreData {
     */
     function creditInsurees() external pure
     {
-
+        
     }
 
     /**
@@ -106,8 +116,9 @@ contract FlightSuretyData is FlightSuretyCoreData {
     *      resulting in insurance payouts, the contract should be self-sustaining
     *
     */   
-    function fund() public payable
+    function fund() requireIsOperational requireIsCallerAuthorized isExternalCallerRegistered public payable
     {
+        airlines[tx.origin].funds = airlines[tx.origin].funds.add(msg.value);
     }
 
     function getFlightKey(address airline, string memory flight, uint256 timestamp) pure internal returns(bytes32) 
@@ -125,7 +136,11 @@ contract FlightSuretyData is FlightSuretyCoreData {
     }
 
     function _addAirline(address newAirline) private {
-        airlines[newAirline] = 1;
+        airlines[newAirline] = Airline({
+            isRegistered: true,
+            funds: 0,
+            airline: newAirline
+        });
         airlinesLength = airlinesLength.add(1);
     }
 
