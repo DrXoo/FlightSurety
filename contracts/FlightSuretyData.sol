@@ -11,6 +11,7 @@ contract FlightSuretyData is FlightSuretyCoreData {
     /********************************************************************************************/
 
     uint8 public constant REGISTRATION_MULTIPARTY_THRESHOLD = 4;
+    uint256 public constant AIRLINE_FUNDS_MINNIMUM = 10 ether;
 
     struct Insurance {
         bool isActive;
@@ -81,7 +82,8 @@ contract FlightSuretyData is FlightSuretyCoreData {
     */   
     function registerAirline(address newAirline) requireIsOperational requireIsCallerAuthorized isExternalCallerRegistered entrancyGuard external 
     {
-        require(!airlines[newAirline].isRegistered); // Not to register an already register airline
+        require(!airlines[newAirline].isRegistered, "Cannot register an already registered airline");
+        require(airlines[tx.origin].funds >= AIRLINE_FUNDS_MINNIMUM, "The original airline must have more funds"); 
 
         if(airlinesLength <= REGISTRATION_MULTIPARTY_THRESHOLD) 
         {
@@ -102,6 +104,10 @@ contract FlightSuretyData is FlightSuretyCoreData {
             // Reset vote count for next time
             airlineVotes = new address[](0);  
         }
+    }
+
+    function isAirline(address airline) external view returns(bool){
+        return airlines[airline].isRegistered;
     }
 
     function getRegistrationStatus(address possibleNewAirline) requireIsOperational requireIsCallerAuthorized isExternalCallerRegistered external view returns(bool success, uint256 votes)
