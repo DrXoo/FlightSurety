@@ -54,7 +54,6 @@ contract FlightSuretyApp is FlightSuretyCore {
         return flightSuretyData.getRegistrationStatus(newAirline);
     }
 
-
    /**
     * @dev Register a future flight for insuring.
     *

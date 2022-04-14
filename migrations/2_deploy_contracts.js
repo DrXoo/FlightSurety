@@ -4,8 +4,9 @@ const fs = require('fs');
 
 module.exports = async function(deployer) {
 
-    let firstAirline = '0xf17f52151EbEF6C7334FAD080c5704D77216b732';
-    await deployer.deploy(FlightSuretyData);
+    const accounts = await web3.eth.getAccounts();
+    
+    await deployer.deploy(FlightSuretyData, accounts[1]);
 
     var flightSuretyData = await FlightSuretyData.deployed();
 

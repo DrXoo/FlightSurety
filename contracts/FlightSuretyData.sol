@@ -47,10 +47,10 @@ contract FlightSuretyData is FlightSuretyCoreData {
     * @dev Constructor
     *      The deploying account becomes contractOwner
     */
-    constructor() public 
+    constructor(address firstAirline) public 
     {
         // Make the contract owner be the first airline to register
-        _addAirline(msg.sender);
+        _addAirline(firstAirline);
     }
 
     /********************************************************************************************/
@@ -58,7 +58,7 @@ contract FlightSuretyData is FlightSuretyCoreData {
     /********************************************************************************************/
 
     modifier isExternalCallerRegistered() {
-        require(airlines[tx.origin].isRegistered);
+        require(airlines[tx.origin].isRegistered, "External caller is not registered");
         _;
     }
 
@@ -85,7 +85,7 @@ contract FlightSuretyData is FlightSuretyCoreData {
         require(!airlines[newAirline].isRegistered, "Cannot register an already registered airline");
         require(airlines[tx.origin].funds >= AIRLINE_FUNDS_MINNIMUM, "The original airline must have more funds"); 
 
-        if(airlinesLength <= REGISTRATION_MULTIPARTY_THRESHOLD) 
+        if(airlinesLength < REGISTRATION_MULTIPARTY_THRESHOLD) 
         {
             // Continue register without limits until threshold
             _addAirline(newAirline);
@@ -174,9 +174,10 @@ contract FlightSuretyData is FlightSuretyCoreData {
     *      resulting in insurance payouts, the contract should be self-sustaining
     *
     */   
-    function fund() requireIsOperational requireIsCallerAuthorized isExternalCallerRegistered public payable
+    function fund() requireIsOperational public payable
     {
-        airlines[tx.origin].funds = airlines[tx.origin].funds.add(msg.value);
+        require(airlines[msg.sender].isRegistered, "Only registered airlines cand provide funds");
+        airlines[msg.sender].funds = airlines[msg.sender].funds.add(msg.value);
     }
 
     function getFlightKey(address airline, string memory flight, uint256 timestamp) pure internal returns(bytes32) 
