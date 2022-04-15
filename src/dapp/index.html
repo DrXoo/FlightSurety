@@ -20,7 +20,58 @@
     </nav>
 
     <main class="container">
+        <div id="airlines-wrapper">
+            <h1>Airlines</h1>
+            <h5>Airlines management</h5>
+            <form id="register-airline-form">
+                <div class="form-group">
+                    <label for="register-airline-address">Airline address:</label>
+                    <input type="text" class="form-control" id="register-airline-address">
+                </div>
+                <button type="button" class="btn btn-primary">Register new Airline</button>
+            </form>
+            <hr>
+            <table id="airlines-table" class="table">
 
+            </table>
+            <hr>
+            <form>
+                <div class="form-group">
+                    <label for="fund-airline-address">Airline address:</label>
+                    <input type="text" class="form-control" id="fund-airline-address">
+                </div>
+                <div class="form-group">
+                    <label for="fund-ether-amount">Amount (ethers):</label>
+                    <input type="number" class="form-control" id="fund-ether-amount">
+                </div>
+                <button type="submit" class="btn btn-primary">Fund Airline</button>
+            </form>
+        </div>
+        <div id="flights-wrapper">
+            <h1>Flights</h1>
+            <h5>You can pay an insurance for the following flights</h5>
+
+            <form>
+                <div class="form-group">
+                    <label for="airline-address">Airline address:</label>
+                    <input type="text" class="form-control" id="airline-address">
+                </div>
+                <div class="form-group">
+                    <label for="flight-name">Flight name:</label>
+                    <input type="text" class="form-control" id="flight-name">
+                </div>
+                <div class="form-group ">
+                    <label for="flight-date">Flight date:</label>
+                    <input type="datetime" class="form-control" id="flight-name">
+                </div>
+                <button type="submit" class="btn btn-primary">Create flight</button>
+            </form>
+            <label id="register-airline-log"></label>
+            <hr>
+            <table id="flights-table" class="table">
+                
+            </table>
+        </div>
         <div id="display-wrapper" class="top-20">
         </div>
         <div class="row top-20">

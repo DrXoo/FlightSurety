@@ -6,17 +6,21 @@ import './flightsurety.css';
 
 (async() => {
 
-    let result = null;
-
     let contract = new Contract('localhost', () => {
 
+        displayAirlines(contract);
+        displayRandomFlights();
+        
         // Read transaction
         contract.isOperational((error, result) => {
-            console.log(error,result);
+            //console.log(error,result);
             display('Operational Status', 'Check if contract is operational', [ { label: 'Operational Status', error: error, value: result} ]);
         });
-    
 
+        DOM.elid('register-airline-form').addEventListener('submit', () => {
+            alert('illo');
+        });
+    
         // User-submitted transaction
         DOM.elid('submit-oracle').addEventListener('click', () => {
             let flight = DOM.elid('flight-number').value;
@@ -30,6 +34,56 @@ import './flightsurety.css';
     
 
 })();
+
+function displayAirlines(contract) {
+    let displayDiv = DOM.elid('airlines-table');
+
+    let headerRow = DOM.tr();
+    headerRow.appendChild(DOM.td('Name'));
+    headerRow.appendChild(DOM.td('Address'));
+
+    displayDiv.appendChild(headerRow);
+
+    contract.airlines.forEach((airline, index) => {
+        contract.isAirlineRegister(airline, (error, result) => {
+            //console.log(error,result);
+            if(result) { // Airline is registered
+                let row = DOM.tr();
+                row.appendChild(DOM.td('Airline ' + (index + 1)));
+                
+                row.appendChild(DOM.td(beautifyAddress(airline)));
+                let button = DOM.button({
+                    className: 'btn btn-light'
+                }, 'Copy');
+                button.addEventListener('click', () => {
+                    navigator.clipboard.writeText(airline);
+                });
+                row.appendChild(button);
+                displayDiv.appendChild(row);
+            } 
+        })
+    })
+
+
+}
+function displayRandomFlights() {
+    let displayDiv = DOM.elid('flights-table');
+    let headerRow = DOM.tr();
+    headerRow.appendChild(DOM.td('Number'));
+    headerRow.appendChild(DOM.td('Date'));
+    headerRow.appendChild(DOM.td('Actions'));
+
+    displayDiv.appendChild(headerRow);
+
+    Array.from(Array(5).keys()).forEach(element => {
+        let exampleRow = DOM.tr();
+        const flight = getRandomFlight();
+        exampleRow.appendChild(DOM.td(flight[0]));
+        exampleRow.appendChild(DOM.td(flight[1]));
+        exampleRow.appendChild(DOM.td(DOM.button({ className: 'btn btn-primary'}, 'Buy insurance')));
+        displayDiv.appendChild(exampleRow);
+    });
+}
 
 
 function display(title, description, results) {
@@ -47,9 +101,22 @@ function display(title, description, results) {
 
 }
 
+function getRandomFlight() {
+    var id = "";
+    const characters = 'ABCDEFGHIJKLMNIOPQRSTUVWXYZ';
+    Array.from(Array(4).keys()).forEach(x => {
+        id+=characters.charAt(Math.floor(Math.random() * characters.length));
+    });
 
+    Array.from(Array(3).keys()).forEach(x => {
+        id+=Math.floor(Math.random() * 10);
+    });
 
+    var date = new Date(Date.now() + Math.floor(Math.random() * 100000) * Math.floor(Math.random() * 100000))
 
+    return [id, date.toDateString()];
+}
 
-
-
+function beautifyAddress(address) {
+    return '...' + address.substring(address.length - 6);
+}
