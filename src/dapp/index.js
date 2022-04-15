@@ -17,8 +17,11 @@ import './flightsurety.css';
             display('Operational Status', 'Check if contract is operational', [ { label: 'Operational Status', error: error, value: result} ]);
         });
 
-        DOM.elid('register-airline-form').addEventListener('submit', () => {
-            alert('illo');
+        DOM.elid('register-airline-button').addEventListener('click', () => {
+            const airlineAddress = DOM.elid('register-airline-address').value;
+            
+            let table = DOM.elid('airlines-table');
+            addAirlineToTable(table, 'New Airline', airlineAddress);
         });
     
         // User-submitted transaction
@@ -48,24 +51,27 @@ function displayAirlines(contract) {
         contract.isAirlineRegister(airline, (error, result) => {
             //console.log(error,result);
             if(result) { // Airline is registered
-                let row = DOM.tr();
-                row.appendChild(DOM.td('Airline ' + (index + 1)));
-                
-                row.appendChild(DOM.td(beautifyAddress(airline)));
-                let button = DOM.button({
-                    className: 'btn btn-light'
-                }, 'Copy');
-                button.addEventListener('click', () => {
-                    navigator.clipboard.writeText(airline);
-                });
-                row.appendChild(button);
-                displayDiv.appendChild(row);
+                addAirlineToTable(displayDiv, 'Airline ' + (index + 1), airline)
             } 
         })
     })
-
-
 }
+
+function addAirlineToTable(tableDiv, name, address) {
+    let row = DOM.tr();
+    row.appendChild(DOM.td(name));
+    
+    row.appendChild(DOM.td(beautifyAddress(address)));
+    let button = DOM.button({
+        className: 'btn btn-light'
+    }, 'Copy');
+    button.addEventListener('click', () => {
+        navigator.clipboard.writeText(address);
+    });
+    row.appendChild(button);
+    tableDiv.appendChild(row);
+}
+
 function displayRandomFlights() {
     let displayDiv = DOM.elid('flights-table');
     let headerRow = DOM.tr();

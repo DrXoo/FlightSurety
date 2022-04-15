@@ -20,21 +20,25 @@
     </nav>
 
     <main class="container">
+        <div id="display-wrapper" class="top-20">
+        </div>
         <div id="airlines-wrapper">
             <h1>Airlines</h1>
-            <h5>Airlines management</h5>
+            <h3>Register airline</h3>
             <form id="register-airline-form">
                 <div class="form-group">
                     <label for="register-airline-address">Airline address:</label>
                     <input type="text" class="form-control" id="register-airline-address">
                 </div>
-                <button type="button" class="btn btn-primary">Register new Airline</button>
+                <button type="button" id="register-airline-button" class="btn btn-primary">Register new Airline</button>
             </form>
             <hr>
+            <h3>List airlines</h3>
             <table id="airlines-table" class="table">
 
             </table>
             <hr>
+            <h3>Fund airline</h3>
             <form>
                 <div class="form-group">
                     <label for="fund-airline-address">Airline address:</label>
@@ -49,8 +53,7 @@
         </div>
         <div id="flights-wrapper">
             <h1>Flights</h1>
-            <h5>You can pay an insurance for the following flights</h5>
-
+            <h3>Register flight</h3>
             <form>
                 <div class="form-group">
                     <label for="airline-address">Airline address:</label>
@@ -67,12 +70,10 @@
                 <button type="submit" class="btn btn-primary">Create flight</button>
             </form>
             <label id="register-airline-log"></label>
-            <hr>
+            <h3>List flights</h3>
             <table id="flights-table" class="table">
                 
             </table>
-        </div>
-        <div id="display-wrapper" class="top-20">
         </div>
         <div class="row top-20">
             <label class="form">Flight</label> <input type="text" id="flight-number"> <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>

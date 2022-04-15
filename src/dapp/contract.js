@@ -45,11 +45,20 @@ export default class Contract {
             .call({ from: self.owner}, callback);
     }
 
-    isAirlineRegister(airLineAddress, callback) {
+    isAirlineRegister(airlineAddress, callback) {
         let self = this;
         self.flightSuretyData.methods
-                .isAirline(airLineAddress)
-                .call({ from: self.owner}, callback);
+            .isAirline(airlineAddress)
+            .call({ from: self.owner}, callback);
+    }
+
+    registerAirline(airlineAddress, callback) {
+        let self = this;
+        self.flightSuretyApp.methods
+            .registerAirline(airlineAddress)
+            .send({ from: self.airlines[0]}, (error, result) => {
+                callback(error, airlineAddress);
+            })
     }
 
     fetchFlightStatus(flight, callback) {
