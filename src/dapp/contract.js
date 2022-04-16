@@ -14,9 +14,21 @@ export default class Contract {
         this.owner = null;
         this.airlines = [];
         this.passengers = [];
+        this.metamaskAccount = null;
     }
 
     initialize(callback) {
+        if (typeof window.ethereum !== 'undefined') {
+            console.log('MetaMask is installed!');
+        }
+
+        ethereum.request({ method: 'eth_requestAccounts' })
+            .then(result => {
+            this.metamaskAccount = result[0];
+        }).catch(error => {
+            console.log(error);
+        });
+
         this.web3.eth.getAccounts((error, accts) => {
            
             this.owner = accts[0];
@@ -59,6 +71,37 @@ export default class Contract {
             .send({ from: self.airlines[0]}, (error, result) => {
                 callback(error, airlineAddress);
             })
+    }
+
+    registerFlight(airline, flightName, date, callback) {
+        let self = this;
+        console.log(airline);
+        console.log(flightName);
+        console.log(date);
+        self.flightSuretyApp.methods
+            .registerFlight(airline, flightName, date)
+            .send({ from: airline}, (error, result) => {
+                callback(error, result)
+            })
+    }
+
+    buyInsurance(airline, flightName, date, amount, callback) {
+        let self = this;
+        self.flightSuretyData.methods
+            .buy(airline, flightName, date)
+            .send({ from: self.passengers[0], amount}, (error, result) => {
+                callback(error, result)
+            })
+    }
+
+    fundAirline(from ,amount, callback) {
+        let self = this;
+        self.flightSuretyData.methods
+            .fund()
+            .send( { from: from, value: this.web3.utils.toWei(amount.toString(), 'ether') }, 
+            (error, result) => {
+                callback(error, result)
+            });
     }
 
     fetchFlightStatus(flight, callback) {

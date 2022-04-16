@@ -38,17 +38,14 @@
 
             </table>
             <hr>
-            <h3>Fund airline</h3>
+            <h3>Fund your Airline</h3>
+            <h5>Fund your airline using your metamask account</h5>
             <form>
-                <div class="form-group">
-                    <label for="fund-airline-address">Airline address:</label>
-                    <input type="text" class="form-control" id="fund-airline-address">
-                </div>
                 <div class="form-group">
                     <label for="fund-ether-amount">Amount (ethers):</label>
                     <input type="number" class="form-control" id="fund-ether-amount">
                 </div>
-                <button type="submit" class="btn btn-primary">Fund Airline</button>
+                <button type="button" class="btn btn-primary" id="fund-airline-button">Fund Airline</button>
             </form>
         </div>
         <div id="flights-wrapper">
@@ -65,9 +62,9 @@
                 </div>
                 <div class="form-group ">
                     <label for="flight-date">Flight date:</label>
-                    <input type="datetime" class="form-control" id="flight-name">
+                    <input type="datetime-local" value="2023-06-12T19:30"class="form-control" id="flight-date">
                 </div>
-                <button type="submit" class="btn btn-primary">Create flight</button>
+                <button type="button" class="btn btn-primary" id="register-flight-button">Create flight</button>
             </form>
             <label id="register-airline-log"></label>
             <h3>List flights</h3>

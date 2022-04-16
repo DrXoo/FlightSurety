@@ -30,6 +30,7 @@ var Config = async function(accounts) {
     return {
         owner: owner,
         firstAirline: firstAirline,
+        passengers: accounts.slice(10, 15),
         weiMultiple: (new BigNumber(10)).pow(18),
         testAddresses: testAddresses,
         flightSuretyData: flightSuretyData,

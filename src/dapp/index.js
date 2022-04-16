@@ -9,7 +9,7 @@ import './flightsurety.css';
     let contract = new Contract('localhost', () => {
 
         displayAirlines(contract);
-        displayRandomFlights();
+        displayFlights();
         
         // Read transaction
         contract.isOperational((error, result) => {
@@ -19,10 +19,34 @@ import './flightsurety.css';
 
         DOM.elid('register-airline-button').addEventListener('click', () => {
             const airlineAddress = DOM.elid('register-airline-address').value;
-            
-            let table = DOM.elid('airlines-table');
-            addAirlineToTable(table, 'New Airline', airlineAddress);
+            contract.registerAirline(airlineAddress, (error, result) => {
+                console.log(error,result);
+                if(!error) {
+                    addAirlineToTable('New Airline', airlineAddress);
+                }
+            })
         });
+
+        DOM.elid('fund-airline-button').addEventListener('click', () => {
+            const amount = DOM.elid('fund-ether-amount').value; 
+            contract.fundAirline(contract.metamaskAccount, amount, (error, result) => {
+                console.log(error,result);
+            })
+        })
+
+        DOM.elid('register-flight-button').addEventListener('click', () => {
+            const airlineAddress = DOM.elid('airline-address').value;
+            const flightName = DOM.elid('flight-name').value;
+            const flightDate = (new Date(DOM.elid('flight-date').value)).getTime();
+
+            contract.registerFlight(airlineAddress, flightName, flightDate, 
+                (error, result) => {
+                    console.log(error, result);
+                    if(!error) {
+                        addFlightToTable(airlineAddress, flightName, flightDate);
+                    }
+            })
+        })
     
         // User-submitted transaction
         DOM.elid('submit-oracle').addEventListener('click', () => {
@@ -33,96 +57,105 @@ import './flightsurety.css';
             });
         })
     
+        function displayAirlines(contract) {
+            let displayDiv = DOM.elid('airlines-table');
+        
+            let headerRow = DOM.tr();
+            headerRow.appendChild(DOM.td('Name'));
+            headerRow.appendChild(DOM.td('Address'));
+        
+            displayDiv.appendChild(headerRow);
+        
+            contract.airlines.forEach((airline, index) => {
+                contract.isAirlineRegister(airline, (error, result) => {
+                    //console.log(error,result);
+                    if(result) { // Airline is registered
+                        addAirlineToTable('Airline ' + (index + 1), airline)
+                    } 
+                })
+            })
+        }
+        
+        function displayFlights() {
+            let table = DOM.elid('flights-table');
+            let headerRow = DOM.tr();
+            headerRow.appendChild(DOM.td('Airline'));
+            headerRow.appendChild(DOM.td('Number'));
+            headerRow.appendChild(DOM.td('Date'));
+            headerRow.appendChild(DOM.td('Actions'));
+        
+            table.appendChild(headerRow);
+        }
+        
+        function display(title, description, results) {
+            let displayDiv = DOM.elid("display-wrapper");
+            let section = DOM.section();
+            section.appendChild(DOM.h2(title));
+            section.appendChild(DOM.h5(description));
+            results.map((result) => {
+                let row = section.appendChild(DOM.div({className:'row'}));
+                row.appendChild(DOM.div({className: 'col-sm-4 field'}, result.label));
+                row.appendChild(DOM.div({className: 'col-sm-8 field-value'}, result.error ? String(result.error) : String(result.value)));
+                section.appendChild(row);
+            })
+            displayDiv.append(section);
+        
+        }
+        
+        function addFlightToTable(airline, name, date) {
+            let table = DOM.elid('flights-table');
+            let row = DOM.tr();
+            row.appendChild(DOM.td(getCellForAddress(airline)));
+            row.appendChild(DOM.td(name));
+            row.appendChild(DOM.td(date));
+
+            let cell = DOM.td();
+
+            cell.appendChild(DOM.input({
+                id: `${airline}-${name}-insurance-amount}`
+            }))
+        
+            let button = DOM.button({
+                className: 'btn btn-primary btn-sm'
+            }, 'Buy insurance');
+            button.addEventListener('click', () => {
+                contract.buyInsurance(airline, name, date, DOM.elid(`${airline}-${name}-insurance-amount}`).value, (error, result) => {
+                    console.log(error,result)
+                })
+            });
+
+            cell.appendChild(button);
+        
+            row.appendChild(cell);
+            table.appendChild(row);
+        }
+        
+        function addAirlineToTable(name, address) {
+            let table = DOM.elid('airlines-table');
+            let row = DOM.tr();
+            row.appendChild(DOM.td(name));
+            row.appendChild(getCellForAddress(address));
+            table.appendChild(row);
+        }
+        
+        function beautifyAddress(address) {
+            return '...' + address.substring(address.length - 6);
+        }
+        
+        function getCellForAddress(address){
+            let button = DOM.button({
+                className: 'btn btn-info btn-sm'
+            }, 'Copy');
+            button.addEventListener('click', () => {
+                navigator.clipboard.writeText(address);
+            });
+        
+            let cell = DOM.td();
+            cell.appendChild(DOM.span(beautifyAddress(address)));
+            cell.appendChild(button);
+        
+            return cell;
+        }
     });
-    
 
 })();
-
-function displayAirlines(contract) {
-    let displayDiv = DOM.elid('airlines-table');
-
-    let headerRow = DOM.tr();
-    headerRow.appendChild(DOM.td('Name'));
-    headerRow.appendChild(DOM.td('Address'));
-
-    displayDiv.appendChild(headerRow);
-
-    contract.airlines.forEach((airline, index) => {
-        contract.isAirlineRegister(airline, (error, result) => {
-            //console.log(error,result);
-            if(result) { // Airline is registered
-                addAirlineToTable(displayDiv, 'Airline ' + (index + 1), airline)
-            } 
-        })
-    })
-}
-
-function addAirlineToTable(tableDiv, name, address) {
-    let row = DOM.tr();
-    row.appendChild(DOM.td(name));
-    
-    row.appendChild(DOM.td(beautifyAddress(address)));
-    let button = DOM.button({
-        className: 'btn btn-light'
-    }, 'Copy');
-    button.addEventListener('click', () => {
-        navigator.clipboard.writeText(address);
-    });
-    row.appendChild(button);
-    tableDiv.appendChild(row);
-}
-
-function displayRandomFlights() {
-    let displayDiv = DOM.elid('flights-table');
-    let headerRow = DOM.tr();
-    headerRow.appendChild(DOM.td('Number'));
-    headerRow.appendChild(DOM.td('Date'));
-    headerRow.appendChild(DOM.td('Actions'));
-
-    displayDiv.appendChild(headerRow);
-
-    Array.from(Array(5).keys()).forEach(element => {
-        let exampleRow = DOM.tr();
-        const flight = getRandomFlight();
-        exampleRow.appendChild(DOM.td(flight[0]));
-        exampleRow.appendChild(DOM.td(flight[1]));
-        exampleRow.appendChild(DOM.td(DOM.button({ className: 'btn btn-primary'}, 'Buy insurance')));
-        displayDiv.appendChild(exampleRow);
-    });
-}
-
-
-function display(title, description, results) {
-    let displayDiv = DOM.elid("display-wrapper");
-    let section = DOM.section();
-    section.appendChild(DOM.h2(title));
-    section.appendChild(DOM.h5(description));
-    results.map((result) => {
-        let row = section.appendChild(DOM.div({className:'row'}));
-        row.appendChild(DOM.div({className: 'col-sm-4 field'}, result.label));
-        row.appendChild(DOM.div({className: 'col-sm-8 field-value'}, result.error ? String(result.error) : String(result.value)));
-        section.appendChild(row);
-    })
-    displayDiv.append(section);
-
-}
-
-function getRandomFlight() {
-    var id = "";
-    const characters = 'ABCDEFGHIJKLMNIOPQRSTUVWXYZ';
-    Array.from(Array(4).keys()).forEach(x => {
-        id+=characters.charAt(Math.floor(Math.random() * characters.length));
-    });
-
-    Array.from(Array(3).keys()).forEach(x => {
-        id+=Math.floor(Math.random() * 10);
-    });
-
-    var date = new Date(Date.now() + Math.floor(Math.random() * 100000) * Math.floor(Math.random() * 100000))
-
-    return [id, date.toDateString()];
-}
-
-function beautifyAddress(address) {
-    return '...' + address.substring(address.length - 6);
-}

@@ -14,6 +14,8 @@ module.exports = async function(deployer) {
 
     var flightSuretyApp = await FlightSuretyApp.deployed();
 
+    flightSuretyData.authorizeContract(flightSuretyApp.address);
+
     const config = {
         localhost: {
             url: 'http://localhost:8545',

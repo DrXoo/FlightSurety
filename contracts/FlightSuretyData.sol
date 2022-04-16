@@ -131,9 +131,11 @@ contract FlightSuretyData is FlightSuretyCoreData {
     * @dev Buy insurance for a flight
     *
     */   
-    function buy(bytes32 flightKey) isSenderNotAContract external payable
+    function buy(address airline, string flight, uint256 timestamp) isSenderNotAContract external payable
     {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
         require(flights[flightKey].insurances[msg.sender].isActive == false, "You already have an insurance for this flight");
+        require(msg.value <= 1 ether, 'Max limit to insurance is 1 ether');
 
         flights[flightKey].insurances[msg.sender] = Insurance({
             isActive: true,
@@ -156,8 +158,9 @@ contract FlightSuretyData is FlightSuretyCoreData {
      *  @dev Transfers eligible payout funds to insuree
      *
     */
-    function pay(bytes32 flightKey) isSenderNotAContract entrancyGuard external
+    function pay(address airline, string flight, uint256 timestamp) isSenderNotAContract entrancyGuard external
     {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
         require(flights[flightKey].statusCode == STATUS_CODE_LATE_AIRLINE, "Cannot receive funds for this flight");
         require(flights[flightKey].insurances[msg.sender].isActive, "This insurance is not active anymore");
 

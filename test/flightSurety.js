@@ -148,6 +148,33 @@ contract('Flight Surety Tests', async (accounts) => {
         assert.equal(result[0], true);
     });
 
+    it('(airline) Airline can register a flight', async() => {
+        // ARRANGE
+        const airline = config.firstAirline;
+        const flight = 'TEST';
+        const date = (new Date(2022, 11, 17)).getTime();
+
+        // ACT
+        await config.flightSuretyApp.registerFlight(airline, flight, date, { from: airline });
+
+        // ASSERT
+    });
+
+    it('(passengers) Passenger can buy an insurance for a flight', async() => {
+        // ARRANGE
+        const airline = config.firstAirline;
+        const flight = 'TEST';
+        const date = (new Date(2022, 11, 17)).getTime();
+        const passenger = config.passengers[0];
+        const amount = web3.utils.toWei('1', 'ether');
+
+        // ACT
+        await config.flightSuretyData.buy(airline, flight, date, { from: passenger, value: amount});            
+
+        // ASSERT
+
+    });
+
     const provideFunds = async(contract, address) => {
         const minnimumFunds = await config.flightSuretyData.AIRLINE_FUNDS_MINNIMUM.call();
         const isRegistered = await contract.isAirline.call(address);
