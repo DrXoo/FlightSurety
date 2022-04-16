@@ -80,7 +80,7 @@ contract FlightSuretyApp is FlightSuretyCore {
 
 
     // Generate a request for oracles to fetch flight information
-    function fetchFlightStatus ( address airline, string flight, uint256 timestamp) external
+    function fetchFlightStatus (address airline, string flight, uint256 timestamp) external
     {
         uint8 index = getRandomIndex(msg.sender);
 

@@ -87,9 +87,20 @@ export default class Contract {
 
     buyInsurance(airline, flightName, date, amount, callback) {
         let self = this;
+        const finneys = this.web3.utils.toWei(amount.toString(), 'finney')
         self.flightSuretyData.methods
             .buy(airline, flightName, date)
-            .send({ from: self.passengers[0], amount}, (error, result) => {
+            .send({ from: self.passengers[0], finneys}, (error, result) => {
+                callback(error, result)
+            })
+    }
+
+    payInsuree(airline, flightName, date, callback) {
+        let self = this;
+
+        self.flightSuretyData.methods
+            .pay(airline, flightName, date)
+            .send({ from: self.passengers[0]}, (error, result) => {
                 callback(error, result)
             })
     }
@@ -104,15 +115,15 @@ export default class Contract {
             });
     }
 
-    fetchFlightStatus(flight, callback) {
+    fetchFlightStatus(airline, flightName, flightDate, callback) {
         let self = this;
         let payload = {
-            airline: self.airlines[0],
-            flight: flight,
-            timestamp: Math.floor(Date.now() / 1000)
+            airline: airline,
+            flight: flightName,
+            timestamp: flightDate
         } 
         self.flightSuretyApp.methods
-            .fetchFlightStatus(payload.airline, payload.flight, payload.timestamp)
+            .fetchFlightStatus(airline, flightName, flightDate)
             .send({ from: self.owner}, (error, result) => {
                 callback(error, payload);
             });

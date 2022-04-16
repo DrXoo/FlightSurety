@@ -20,8 +20,7 @@ contract FlightSuretyData is FlightSuretyCoreData {
 
     struct Flight {
         bool isRegistered;
-        uint8 statusCode;
-        uint256 updatedTimestamp;        
+        uint8 statusCode;       
         address airline;
         mapping(address => Insurance) insurances;
     }
@@ -122,7 +121,6 @@ contract FlightSuretyData is FlightSuretyCoreData {
         flights[flightKey] = Flight({
             isRegistered: true,
             statusCode: STATUS_CODE_ON_TIME,
-            updatedTimestamp: block.timestamp,
             airline: airline
         });
     }
@@ -151,7 +149,6 @@ contract FlightSuretyData is FlightSuretyCoreData {
         require(flights[flightKey].statusCode == STATUS_CODE_ON_TIME, "Cannot change status if it is not 'ON_TIME'");
 
         flights[flightKey].statusCode = STATUS_CODE_LATE_AIRLINE;
-        flights[flightKey].updatedTimestamp = block.timestamp;
     }
 
     /**

@@ -48,15 +48,6 @@ import './flightsurety.css';
             })
         })
     
-        // User-submitted transaction
-        DOM.elid('submit-oracle').addEventListener('click', () => {
-            let flight = DOM.elid('flight-number').value;
-            // Write transaction
-            contract.fetchFlightStatus(flight, (error, result) => {
-                display('Oracles', 'Trigger oracles', [ { label: 'Fetch Flight Status', error: error, value: result.flight + ' ' + result.timestamp} ]);
-            });
-        })
-    
         function displayAirlines(contract) {
             let displayDiv = DOM.elid('airlines-table');
         
@@ -105,26 +96,39 @@ import './flightsurety.css';
         function addFlightToTable(airline, name, date) {
             let table = DOM.elid('flights-table');
             let row = DOM.tr();
-            row.appendChild(DOM.td(getCellForAddress(airline)));
+            row.appendChild(getCellForAddress(airline));
             row.appendChild(DOM.td(name));
             row.appendChild(DOM.td(date));
 
             let cell = DOM.td();
 
             cell.appendChild(DOM.input({
-                id: `${airline}-${name}-insurance-amount}`
-            }))
-        
-            let button = DOM.button({
-                className: 'btn btn-primary btn-sm'
-            }, 'Buy insurance');
-            button.addEventListener('click', () => {
-                contract.buyInsurance(airline, name, date, DOM.elid(`${airline}-${name}-insurance-amount}`).value, (error, result) => {
-                    console.log(error,result)
-                })
-            });
+                id: `${airline}-${name}-insurance-amount}`,
+                type: 'number',
+            }));
 
-            cell.appendChild(button);
+            cell.appendChild(DOM.span('In Finneys'))
+
+            cell.appendChild(createCellButton('btn btn-primary btn-sm', 'Buy insurance', 
+            () => {
+                contract.buyInsurance(airline, name, date, DOM.elid(`${airline}-${name}-insurance-amount}`).value, (error, result) => {
+                    console.log(error,result);
+                })
+            }));
+
+            cell.appendChild(createCellButton('btn btn-primary btn-sm', 'Send to Oracle', 
+            () => {
+                contract.fetchFlightStatus(airline, name, date, (error, result) => {
+                    display('Oracles', 'Trigger oracles', [ { label: 'Fetch Flight Status', error: error, value: result.flight + ' ' + result.timestamp} ]);
+                });
+            }));
+
+            cell.appendChild(createCellButton('btn btn-primary btn-sm', 'Receive Money', 
+            () => {
+                contract.payInsuree(airline, name, date, (error, result) => {
+                    console.log(error,result);
+                })
+            }));
         
             row.appendChild(cell);
             table.appendChild(row);
@@ -155,6 +159,15 @@ import './flightsurety.css';
             cell.appendChild(button);
         
             return cell;
+        }
+
+        function createCellButton(className, text, clickAction){
+            let button = DOM.button({
+                className: className
+            }, text);
+            button.addEventListener('click', clickAction);
+
+            return button;
         }
     });
 
